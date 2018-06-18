@@ -4,7 +4,7 @@ public class BobSort {
 
         Integer[] items = {5, 4, 3, 1, 2, 9, 8, 6, 7};
         bobSort(items);
-        KTools.print(items);
+        Tools.print(items);
     }
 
     /**
@@ -16,7 +16,7 @@ public class BobSort {
         for (int i = 1; i < items.length; i++) {
             for (int j = 0; j < items.length - i; j++) {
                 if (items[j].compareTo(items[j + 1]) > 0) {
-                    KTools.swap(items, j, j + 1);
+                    Tools.swap(items, j, j + 1);
                 }
             }
         }
