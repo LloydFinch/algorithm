@@ -8,7 +8,8 @@ public class BucketSort {
 
 
     /**
-     * 桶排序
+     * 桶排序 O(m+n) m为桶的个数，n为待排序的个数
+     * :浪费内存
      *
      * @param range
      * @param data
