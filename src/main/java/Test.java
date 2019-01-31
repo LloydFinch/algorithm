@@ -45,6 +45,21 @@ public class Test {
         System.out.println(a);
 
         System.out.println("\251");
+
+        TreeNode treeNode = new TreeNode();
+        treeNode.value = "10";
+        add(treeNode);
+        System.out.println(treeNode.value);
+
+    }
+
+    private static void add(TreeNode treeNode) {
+//        treeNode.value = "100";
+
+        TreeNode treeNode1 = new TreeNode();
+        treeNode1.value = "100";
+
+        treeNode = treeNode1;
     }
 
     private static void setVMPolicy() {
