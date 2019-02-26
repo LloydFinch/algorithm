@@ -51,6 +51,11 @@ public class Test {
         add(treeNode);
         System.out.println(treeNode.value);
 
+        System.out.println("-----------------------------------");
+        testEnumSet();
+
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+        test();
     }
 
     private static void add(TreeNode treeNode) {
@@ -123,6 +128,34 @@ public class Test {
         linkedHashMap.get("a");
         linkedHashMap.put("e", "ehello");
         System.out.println(linkedHashMap);
+
+        LinkedHashMap<String, String> linkedHashMap1 = new LinkedHashMap<>(10, 1, true);
+        LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
+    }
+
+    public enum Size {
+        SMALL, MEDIUM, LATGE
+    }
+
+    private static void testEnumMap() {
+        //一个枚举map
+        EnumMap<Size, String> enumMap = new EnumMap<>(Size.class);
+    }
+
+    private static void testEnumSet() {
+        EnumSet<Size> enumSet = EnumSet.noneOf(Size.class);
+        int count = enumSet.size();
+        enumSet.add(Size.SMALL);
+        enumSet.remove(Size.SMALL);
+
+        BitSet bitSet = new BitSet(10);
+        bitSet.set(1);
+        System.out.println(bitSet.toString());
+    }
+
+    private static void testPriorityQueue() {
+        //这玩意实现了堆
+        PriorityQueue<String> priorityQueue = new PriorityQueue<>();
     }
 
     private static String getCommonPre(String[] strs) {
@@ -174,5 +207,75 @@ public class Test {
         public TreeNode right;
         public String value;
 
+    }
+
+    private static void test() {
+        String hello = "#123456###7855555#";
+        String hello2 = "#123456#77777#666#";
+        int start = hello.indexOf("#");
+        int end = hello.indexOf("#", start + 1);
+        String string = hello.substring(start, end + 1);
+        System.out.println(start + ", " + end + ", " + string);
+
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+
+        System.out.println(setTextColorByFlag(hello, "#").toString());
+    }
+
+    /**
+     * 将content的两个flag之间的内容连同flag进行特殊标记
+     *
+     * @param content
+     * @param flag
+     * @return
+     */
+    public static CharSequence setTextColorByFlag(CharSequence content, String flag) {
+        CharSequence result = content;
+        if (content != null) {
+            String str = result.toString();
+            int lastFlagIndex = str.length() - 2; //因为最后必修有一个字符和一个#
+            if (str.contains(flag)) {
+                StringBuilder builder = new StringBuilder();
+                int startOffset = 0; //表示从这里开始找
+                int start = 0;//表示找到的开始位置
+                int end = start + 1; //表示找到的结束位置
+                while (start < lastFlagIndex) {
+                    start = str.indexOf(flag, startOffset); //本次开始位置，可能跟上次的位置不连贯
+                    if (start >= 0 && start < lastFlagIndex) {
+                        //说明找到了第一个flag
+                        //从第一个位置的下一个位置开始找
+                        end = str.indexOf(flag, start + 1); //结束位置
+                        if (end > 0) {
+                            //在这里判断一下连接性，然后缀上
+                            if (start > startOffset) {
+                                String outStr = str.substring(startOffset, start);
+                                builder.append("\n").append(outStr);
+                                System.out.println("跨越了");
+                            }
+
+                            //表示找到了，截取找到的部分，添加底色
+                            String s = str.substring(start, end + 1);
+                            builder.append("\n").append(s);
+                            //从下一个位置开始重新找
+                            startOffset = end + 1;
+                        } else {
+                            //本轮找到开始标记但是没找到结束标记，缀上剩余字符串
+                            String s = str.substring(startOffset);
+                            builder.append("\n").append(s);
+                            System.out.println("有开始没结束");
+                            break;
+                        }
+                    } else {
+                        //本轮没找到开始标记，缀上剩余的字符串
+                        String s = str.substring(startOffset);
+                        builder.append("\n").append(s);
+                        System.out.println("没开始");
+                        break;
+                    }
+                }
+                return builder;
+            }
+        }
+        return result;
     }
 }
