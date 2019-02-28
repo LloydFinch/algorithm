@@ -1,7 +1,11 @@
 
 import java.io.*;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.Base64;
+import java.util.Date;
+import java.util.RandomAccess;
 import java.util.Scanner;
 import java.util.zip.*;
 
@@ -35,9 +39,11 @@ public class TestFile {
 //            e.printStackTrace();
 //        }
 
-        testFile();
+//        testFile();
 
-        testHighLevelFile();
+//        testHighLevelFile();
+
+        testRandomAccessFile();
     }
 
 
@@ -673,6 +679,65 @@ public class TestFile {
     }
 
 
+    //===================================================================================================================
+
+    /**
+     * 随机读取文件 RandomAccessFile，可以当作java的SharedPreference来使用
+     */
+    public static void testRandomAccessFile() {
+        //r:读
+        //rw:读写
+        //rws:读写，并且文件内容和元数据数据更新都同步到设备上
+        //rwd:读写，文件内容的更新同步到设备，元数据不需要
+
+        try {
+            RandomAccessFile randomAccessFile = new RandomAccessFile("randomfile.txt", "rw");
+
+            long length = randomAccessFile.length();//获取当前文件的长度，单位是字节
+            //设置文件长度，如果小于原来的长度，则会截取；如果大于则会扩展，扩展部分内容为为定义，这是一个native方法
+            randomAccessFile.setLength(10086L);
+
+            //这两个方法都是没有编码概念，假定一个字节代表一个字符，对中文不成立，尽量少使用
+            randomAccessFile.writeBytes("hello");
+            randomAccessFile.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 内存映射文件
+     */
+    public static void testFileChannel() {
+        try {
+            RandomAccessFile randomAccessFile = new RandomAccessFile("testFileChannel.txt", "rw");
+            FileChannel channel = randomAccessFile.getChannel();
+            MappedByteBuffer map = channel.map(FileChannel.MapMode.READ_WRITE, 0, 10);
+            //这个map有一堆对文件位置操作的方法，暂时没什么卵用
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 序列化 ObjectOutputStream/ObjectInputStream
+     * 序列化是通过反射实现的
+     */
+    public static void testObjectStream() {
+        try {
+            //transient 修饰的属性，在序列化的时候会忽视
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream("hello")));
+            objectOutputStream.writeObject(new Date()); //可以直接写对象
+
+            ObjectInputStream objectInputStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream("hello")));
+            Date date = (Date) objectInputStream.readObject();//可以直接读对象
+            println(date.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //===================================================================================================================
     private static void print(String content) {
         System.out.print(content);
     }
