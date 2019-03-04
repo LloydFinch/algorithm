@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Condition;
 
 public class TestThread {
 
@@ -14,7 +13,8 @@ public class TestThread {
 //        testThreadCreate();
 //        testSynchronized();
 
-        testSyncCollections();
+//        testSyncCollections();
+        testWaitNotify();
     }
 
     /**
@@ -24,6 +24,13 @@ public class TestThread {
 
         //继承Thread来创建
         Thread thread = new Thread(() -> {
+
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             println(Thread.currentThread().getId()); //获取id
             println(Thread.currentThread().getName()); //获取名字
             println(Thread.currentThread().getPriority()); //获取权限1-10，默认是5
@@ -37,13 +44,9 @@ public class TestThread {
         thread.start();
         println("this is main thread before join===");
         try {
-//            Thread.sleep(1500);
-            thread.join(1000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-//            Thread.sleep(1000);
+            //"当前线程"最多等待thread 2000ms，如果thread跑完了没大于2000ms，
+            //那就紧跟着运行，如果超过了2000ms，那就直接运行，不再等了
+            thread.join(2000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -106,7 +109,7 @@ public class TestThread {
 
         //deep in synchronized
         //1 可重入性:funcA(),funcB()都是synchronized的，threadA有了锁，在funcA()内部可以直接调用funcB()
-        //2 内存可见性:原子操作也不一定是安全的，因为修改的变量还存在又"内存可见性"问题，可以加synchronized来保证，
+        //2 内存可见性:原子操作也不一定是安全的，因为修改的变量还存在"内存可见性"问题，可以加synchronized来保证，
         //  但是如果仅仅是为了保证内存可见性，可以使用更加轻量的volatile关键字
         //3 死锁:尽量避免
 
@@ -147,13 +150,72 @@ public class TestThread {
         ConcurrentSkipListSet<String> set = new ConcurrentSkipListSet<>();
     }
 
+    /**
+     * 线程协作wait/notify
+     */
+    public static void testWaitNotify() {
+        WaitThread waitThread = new WaitThread();
+        waitThread.start();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        println("fire...");
+        waitThread.fire();
+        println("in main ,after fire, wait thread state = " + waitThread.getState());
+    }
+
     private static void println(Object object) {
         System.out.println(object);
     }
 
+    /**
+     * WaitThread对象，测试wait/notify
+     */
+    public static class WaitThread extends Thread {
+        private volatile boolean fire = false;
+
+        @Override
+        public void run() {
+            //凡是wait，必须加锁，mmp不知为什么
+            try {
+                synchronized (this) {
+                    println("WaitThread start...,state = " + getState());
+                    while (!fire) {
+                        println("before wait...,state = " + getState());
+                        wait(0);//这个会将当前线程放入条件等待队列，挂在wait函数内部
+                        println("after wait...,state = " + getState());
+                    }
+                }
+                //这里有个问题，if和while的区别何在?
+                //但是while模式是一个模版，就这么写
+//                    if (!fire) {
+//                        println("wait...");
+//                        wait();
+//                    }
+                println("fired...");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        /**
+         * 这一块是在主线程中跑的
+         */
+        public synchronized void fire() {
+            this.fire = true;
+            println("before notify...,state = " + getState());//TIMED_WAITING，因为等待条件
+            notify(); //线程移出等待队列，准备进入wait函数，但是发现没有锁，进不去，就等着
+            println("after notify...,state = " + getState());//BLOCKED，因为等待锁
+            //到这里synchronized已经跑完了，释放锁，wait的线程可以进入了，直接进入wait方法中去
+        }
+    }
 
     /**
-     * counter对象，测试synchronized关键字
+     * Counter对象，测试synchronized关键字
      */
     public static class Counter implements Runnable {
 
