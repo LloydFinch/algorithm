@@ -1,11 +1,11 @@
 
+import javax.imageio.IIOException;
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Date;
-import java.util.RandomAccess;
 import java.util.Scanner;
 import java.util.zip.*;
 
@@ -43,7 +43,69 @@ public class TestFile {
 
 //        testHighLevelFile();
 
-        testRandomAccessFile();
+//        testRandomAccessFile();
+
+        //testAndroidLog();
+
+        testRenameFile();
+    }
+
+    /**
+     * 测试一下log
+     */
+    public static void testAndroidLog() {
+        String name = "LOG.txt";
+        try {
+            File file = new File(name);
+            if (!file.exists()) {
+                boolean newFile = file.createNewFile();
+                if (newFile) {
+                    println("create new file: " + name);
+                }
+                file.setReadable(false);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testRenameFile() {
+        String name = "LOG1.txt";
+        try {
+            File file = new File(name);
+            if (!file.exists()) {
+                boolean newFile = file.createNewFile();
+                if (newFile) {
+                    file.setReadable(false);
+                    println("create new file: " + name);
+                }
+            }
+
+            String name1 = "1LOG.txt";
+            File tempFile = new File(name1);
+            if (!tempFile.exists()) {
+                boolean newFile = tempFile.createNewFile();
+                if (newFile) {
+                    println("create new file: " + name1);
+                    tempFile.setReadable(false);
+                    boolean rename = tempFile.renameTo(file);
+                    if (rename) {
+                        //需要关心的是，第一：旧文件还在不在(不在了) 2新文件是否可见(不可见) 3原有文件属性不存在，都是新的
+                        println("rename file success");
+                        file = tempFile;
+                    }
+                }
+            } else {
+                boolean rename = tempFile.renameTo(file);
+                if (rename) {
+                    println("rename file success");
+                    file = tempFile;
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
