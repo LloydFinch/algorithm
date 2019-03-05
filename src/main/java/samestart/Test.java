@@ -1,5 +1,10 @@
 package samestart;
 
+
+/**
+ * 等待信号，一起开始
+ * 都先wait，等待信号线程修改信号，然后notifyAll
+ */
 public class Test {
 
     public static void main(String[] args) {
