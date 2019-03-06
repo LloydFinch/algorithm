@@ -13,7 +13,12 @@ public class Racer extends Thread {
     @Override
     public void run() {
         try {
-            fireFlag.waitSingle();
+//            fireFlag.waitSingle();
+            synchronized (fireFlag) {
+                while (!fireFlag.isFired()) {
+                    fireFlag.wait();
+                }
+            }
             System.out.println(System.currentTimeMillis() + "start run: " + Thread.currentThread().getName());
         } catch (InterruptedException e) {
             e.printStackTrace();

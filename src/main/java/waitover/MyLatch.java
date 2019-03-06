@@ -2,6 +2,9 @@ package waitover;
 
 /**
  * 等待结束-信号器
+ * java中有专门的CountDownLatch
+ * <p>
+ * see {@link java.util.concurrent.CountDownLatch}
  */
 public class MyLatch {
 
