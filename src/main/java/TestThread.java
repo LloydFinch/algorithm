@@ -14,7 +14,9 @@ public class TestThread {
 //        testSynchronized();
 
 //        testSyncCollections();
-        testWaitNotify();
+//        testWaitNotify();
+
+        testInterrupt();
     }
 
     /**
@@ -125,6 +127,7 @@ public class TestThread {
         //伪同步:因为同步的锁不相同
         //迭代:一个修改一个遍历，java会抛出异常
 
+        //同步容器
         /**
          * 迭代的时候改变，会抛出异常
          */
@@ -140,10 +143,8 @@ public class TestThread {
             }
         }
 
-
-        //同步容器效率比较低
-        //对比并发容器
-
+        //并发容器
+        //这些容器对比同步容器：效率比较高
         CopyOnWriteArrayList<String> strings = new CopyOnWriteArrayList<>();
         ConcurrentHashMap<String, Integer> hashMap = new ConcurrentHashMap<>();
         ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();
@@ -167,6 +168,80 @@ public class TestThread {
         waitThread.fire();
         println("in main ,after fire, wait thread state = " + waitThread.getState());
     }
+
+    /**
+     * interrupt
+     */
+    public static void testInterrupt() {
+
+        //wait/timed_wait情况下中断测试
+//        Thread thread = new Thread() {
+//            @Override
+//            public void run() {
+//                try {
+//                    sleep(1000);
+//                } catch (InterruptedException e) {
+//                    //抛出中断异常，不是设置中断标志位，需要手动处理
+//                    //一般情况下，中断异常不应该捕获，应该交由上层处理
+//                    println(getState());
+//                    println("is interrupt:" + isInterrupted());//false
+//                    interrupt();//这里手动设置一下中断标记位
+//                    println("is interrupt:" + isInterrupted());//false
+//                }
+//            }
+//        };
+//        thread.start();
+//
+//        try {
+//            Thread.sleep(100);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        println(thread.getState());
+//        thread.interrupt();
+
+
+        //=========block的情况下中断的测试
+
+
+        Object lock = new Object();
+        Thread t2 = new Thread() {
+            @Override
+            public void run() {
+//                synchronized (lock) {
+//                    while (!isInterrupted()) {
+//                        println("in while loop");
+//                    }
+//                }
+                println("jump from while:" + getState());
+            }
+        };
+
+        //这里线程只是new出来，NEW状态，调用interrupt没用
+        println("new Thread state:" + t2.getState());
+
+        synchronized (lock) {
+            try {
+                t2.start();
+//                Thread.sleep(16);
+//                t2.interrupt();
+//                t2.join();//死循环了，当前线程等t2，t2又等待当前线程的锁，慢慢等吧
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //线程跑完了，TERMINATED状态，interrupt没用
+        println("after Thread run finished:" + t2.getState());
+
+    }
+
 
     private static void println(Object object) {
         System.out.println(object);
