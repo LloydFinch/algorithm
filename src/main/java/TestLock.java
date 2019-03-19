@@ -1,7 +1,11 @@
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * 使用java原生Lock提供的锁，lock()有死锁问题，使用tryLock()避免死锁问题
+ */
 public class TestLock {
 
     public static void main(String[] args) {
@@ -17,7 +21,10 @@ public class TestLock {
 
         //===============================
         //测试一下避免死锁的案例
-        testTryLockDemo();
+//        testTryLockDemo();
+
+        //===============================
+        testLockSupport();
     }
 
     public static int testReturn() {
@@ -30,8 +37,29 @@ public class TestLock {
         }
     }
 
-    public static void testLock() {
+    /**
+     * LockSupport:ReentrantLock就是基于这个实现的
+     */
+    public static void testLockSupport() {
+//        LockSupport.park(); //使得当前线程放弃cpu，进入WAITING状态，响应中断
+//        LockSupport.unpark(Thread.currentThread()); //使得当前线程从重新竞争cpu
 
+        Thread thread = new Thread(() -> {
+            LockSupport.park(); //当前线程放弃cpu，进入WAITING
+//            LockSupport.parkNanos(1000000); // 当前线程最长等待1000000ns
+//            LockSupport.parkUntil(System.currentTimeMillis() + 3000);//等到当前线程+1000ms的时刻
+            println("after park: " + Thread.currentThread().getState());
+        });
+
+        thread.start();
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        println(thread.getState()); //WAITING，因为LockSupport.park()
+//        LockSupport.unpark(thread); //使得thread可以被调度
+        thread.interrupt();
     }
 
 
@@ -196,7 +224,7 @@ public class TestLock {
          * @param to
          * @param money
          */
-        public void transfer(Account from, Account to, double money) throws Exception {
+        void transfer(Account from, Account to, double money) throws Exception {
             if (from.tryLock()) {//使用tryLock()避免死锁
                 try {
                     if (to.tryLock()) {
