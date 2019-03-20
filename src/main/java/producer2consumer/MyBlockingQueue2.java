@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 使用显式锁和显式条件实现的高效的队列
+ * {@link java.util.concurrent.ArrayBlockingQueue}
  */
 public class MyBlockingQueue2<E> {
     private int limit;
