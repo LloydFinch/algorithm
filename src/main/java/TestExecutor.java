@@ -1,4 +1,5 @@
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Random;
 import java.util.concurrent.*;
 
@@ -16,7 +17,28 @@ public class TestExecutor {
 
 //        testThreadPoolExecutor();
 
-        testTimer();
+//        testTimer();
+
+        //用来证明hashtable不能使用null作为k而已和value
+        Hashtable<String, String> hashtable = new Hashtable<>();
+        hashtable.put("hello", "hello");
+        hashtable.remove("hello");
+        String value = hashtable.get("hello");
+        println(value);
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        executorService.execute(() -> {
+            //模拟自线程中的任务
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //这里切换到main线程中去处理
+
+        });
+
     }
 
     private static void test1() throws ExecutionException, InterruptedException {
