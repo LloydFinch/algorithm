@@ -1,10 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -15,7 +12,8 @@ public class TestConcurrentTools {
     public static void main(String[] args) {
 //        testSemaphore();
 //        testCountDownLatch();
-        testCyclicBarrier();
+//        testCyclicBarrier();
+        testThreadLocal();
     }
 
     /**
@@ -90,15 +88,14 @@ public class TestConcurrentTools {
             new TT(cyclicBarrier).start();
         }
 
+        //这个例外的thread里面少了一个await，其他的所有thread都会一直等待他的await
         new Thread(() -> {
             try {
                 Thread.sleep(new Random().nextInt(1000) + 100);
                 //这个表示已经到达一个集合点A
                 println(Thread.currentThread().getName() + "到达C");
                 cyclicBarrier.await(); //通知自己已经到达
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (BrokenBarrierException e) {
+            } catch (InterruptedException | BrokenBarrierException e) {
                 e.printStackTrace();
             }
         }).start();
@@ -109,14 +106,43 @@ public class TestConcurrentTools {
      * ThreadLocal
      */
     public static void testThreadLocal() {
+        //线程独立的，每个线程只能获取到在自己本省中设置的值，不受其他线程影响
+        ThreadLocal<Integer> threadLocal = ThreadLocal.withInitial(() -> {
+            //用来赋初始值
+            return 300;
+        });
+        println(threadLocal.get());
+        //当前在main线程中，赋值100
+        threadLocal.set(100);
+        println("main-thread, set: " + 100);
+        new Thread(() -> {
+            println("new-thread, get: " + threadLocal.get()); //在新线程中取值
+            threadLocal.set(200);
+            println("new-thread, set: " + 200);
+            println("new thread, get: " + threadLocal.get()); //在自身线程中赋值后再取值
+        }).start();
 
+        try {
+            //休眠1s，确保新线程已经赋值为200
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        println("main-thread, get: " + threadLocal.get());
+
+        threadLocal.remove();//移除在当前线程赋予的值，那么就只剩原来的初始值，就是300
+        println("main-thread, after remove: " + threadLocal.get());
+
+
+        //ThreadLocal随机数,减少资源冲突
+        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
+        threadLocalRandom.nextInt();
     }
 
     /**
      * 用来测试ClickBarrier
      */
     public static class TT extends Thread {
-        public String name;
         public CyclicBarrier cyclicBarrier;
 
         public TT(CyclicBarrier cyclicBarrier) {
@@ -136,9 +162,7 @@ public class TestConcurrentTools {
                 println(Thread.currentThread().getName() + "到达B");
                 cyclicBarrier.await(); //通知自己已经到达
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (BrokenBarrierException e) {
+            } catch (InterruptedException | BrokenBarrierException e) {
                 e.printStackTrace();
             }
         }
