@@ -137,6 +137,9 @@ public class TestConcurrentTools {
         //ThreadLocal随机数,减少资源冲突
         ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
         threadLocalRandom.nextInt();
+
+        //CAS的底层就是根据这玩意实现的
+//        Unsafe unsafe = Unsafe.getUnsafe();
     }
 
     /**

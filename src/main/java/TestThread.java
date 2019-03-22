@@ -16,7 +16,44 @@ public class TestThread {
 //        testSyncCollections();
 //        testWaitNotify();
 
-        testInterrupt();
+//        testInterrupt();
+
+        testWaitNotifyDeeply();
+    }
+
+
+    /**
+     * 这里demo证明:
+     * 1 notify可以在任意地方唤醒wait的线程，即使在不同线程
+     * 2 synchronized(lock),lock.wait(),lock.notify()这三个lock必须一样，是谁无所谓，只要一样就行
+     * 3 wait()后线程会释放synchronized(lock)的lock，否则notify()一辈子都调不到
+     */
+    private static void testWaitNotifyDeeply() {
+        Object lock = new Object();
+        Object test = new Object();
+        Thread thread = new Thread(() -> {
+            synchronized (lock) {
+                try {
+                    println("start wait");
+                    lock.wait();
+                    println("end wait");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+
+        try {
+            //1000ms后唤醒那个sb线程
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        println("main notify");
+        synchronized (lock) {
+            lock.notify();
+        }
     }
 
     /**
