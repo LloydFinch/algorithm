@@ -1,3 +1,4 @@
+import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.*;
 
@@ -7,11 +8,15 @@ import java.util.concurrent.*;
 public class TestExecutor {
 
     public static void main(String[] args) {
-        try {
-            test1();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            test1();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+//        testThreadPoolExecutor();
+
+        testTimer();
     }
 
     private static void test1() throws ExecutionException, InterruptedException {
@@ -49,8 +54,52 @@ public class TestExecutor {
         Executors.newCachedThreadPool(); //core:0 max:Integer.MAX_VALUE alive:60s
     }
 
-    private static void testTimer() {
+    /**
+     * 线程池参数问题
+     */
+    public static void testThreadPoolExecutor() {
+        int core = 2;
+        int max = 10;
+        int alive = 0;
+        TimeUnit timeUnit = TimeUnit.SECONDS;
+        //非阻塞的queue不能用于线程池
+//        ConcurrentLinkedQueue<Runnable> concurrentLinkedQueue = new ConcurrentLinkedQueue<>();
+        LinkedBlockingDeque<Runnable> linkedBlockingDeque = new LinkedBlockingDeque<>(); //无界的queue，max无效，最多创建core个线程，可以视为max = core
+        ArrayBlockingQueue<Runnable> arrayBlockingQueue = new ArrayBlockingQueue<>(3); //有界的queue，上述参数都有效
+        SynchronousQueue<Runnable> synchronousQueue = new SynchronousQueue<>(); //使用这个，会无限创建线程，可以视为max = Integer.MAX_VALUE
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(core, max, alive, timeUnit, synchronousQueue);
+        threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> println("被拒绝了"));
+        for (int i = 1; i <= 10; i++) {
+            println("thread:" + i);
+            threadPoolExecutor.execute(() -> {
+                while (true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+        println(threadPoolExecutor.getPoolSize() + "-" + threadPoolExecutor.getCorePoolSize());
+        println("----------------" + threadPoolExecutor.getActiveCount() + "-" + threadPoolExecutor.getMaximumPoolSize() + "-" + threadPoolExecutor.getLargestPoolSize() + "-" + threadPoolExecutor.getTaskCount());
+    }
 
+    private static void testTimer() {
+        //两种定时器的构造方式
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+        ScheduledExecutorService executorService1 = new ScheduledThreadPoolExecutor(1);
+        //每隔一秒打印一次时间
+        //按照时间打印，根据当前时间决定，打印一次
+        executorService.scheduleWithFixedDelay(() -> println("time = " + new Date()), 0, 1, TimeUnit.SECONDS);
+        //按照次数打印，会补全次数，打印两次哦
+        executorService.scheduleAtFixedRate(() -> println("time2 = " + new Date()), 0, 1, TimeUnit.SECONDS);
+        try {
+            Thread.sleep(1000); //1秒后关闭计时器
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        executorService.shutdown();//取消计时任务
     }
 
     public static void println(Object o) {
