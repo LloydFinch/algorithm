@@ -1,5 +1,6 @@
 import java.lang.annotation.*;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 public class TestAnnotation {
 
@@ -87,6 +88,7 @@ public class TestAnnotation {
                     }
                 }
             }
+
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }

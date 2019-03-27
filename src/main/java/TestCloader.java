@@ -77,6 +77,8 @@ public class TestCloader {
         }
 
         //反射的方法
-        Class.forName();
+//        Class.forName();
+
+        return null;
     }
 }
