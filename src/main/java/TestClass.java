@@ -8,7 +8,12 @@ public class TestClass {
 //        loadClass(A.class);
 
 //        AA aa = new AA();
-        loadClass(AA.class);
+//        loadClass(AA.class);
+
+        //测试多态
+        A a = new AA();
+        println(a.getValue()); //拿的是AA的成员方法
+        println(a.b); //拿的是A的成员变量
     }
 
     public static class A {
@@ -34,16 +39,22 @@ public class TestClass {
             println("A constructor, a=" + a + ", b=" + b);
 
         }
+
+        public int getValue() {
+            println("A getValue=" + b);
+            return b;
+        }
     }
 
     public static class AA extends A {
 
+        int b = 100;
         int c = 3;
         int d = 4;
 
         {
             //第二个执行
-            b = 11;
+//            b = 11;
             println("AA init, a=" + a + ", b=" + b + ", c=" + c + ", d=" + d);
         }
 
@@ -58,7 +69,11 @@ public class TestClass {
             a = 6;
             b = 6;
             println("AA constructor, a=" + a + ", b=" + b + ", c=" + c + ", d=" + d);
+        }
 
+        public int getValue() {
+            println("AA getValue=" + b);
+            return b;
         }
     }
 
