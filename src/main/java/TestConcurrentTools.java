@@ -10,10 +10,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class TestConcurrentTools {
 
     public static void main(String[] args) {
-//        testSemaphore();
+        testSemaphore();
 //        testCountDownLatch();
 //        testCyclicBarrier();
-        testThreadLocal();
+//        testThreadLocal();
     }
 
     /**
@@ -26,19 +26,29 @@ public class TestConcurrentTools {
     }
 
     /**
-     * Semaphore
+     * Semaphore 不可重入
+     * 重入需要消耗一个凭证(acquire())
      */
     private static void testSemaphore() {
         try {
             //给10个许可证
-            Semaphore semaphore = new Semaphore(1);
-            semaphore.acquire();
-            println("acquire1");
+            Semaphore semaphore = new Semaphore(0);
 
             //可以由另一个线程release
-            new Thread(semaphore::release).start();
-            semaphore.acquire(); //这里不release就走不进来，因为不是可重入的
-            println("acquire2");
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                semaphore.release();
+            }).start();
+
+            semaphore.acquire();
+            println("acquire1");
+//
+//            semaphore.acquire(); //这里不release就走不进来，因为不是可重入的
+//            println("acquire2");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -46,6 +56,7 @@ public class TestConcurrentTools {
 
     /**
      * CountDownLatch
+     * 同时开始
      */
     private static void testCountDownLatch() {
         int num = 10; //10个参与者在赛跑
@@ -76,14 +87,15 @@ public class TestConcurrentTools {
 
     /**
      * CyclicBarrier
+     * 等待结束
      */
     private static void testCyclicBarrier() {
         int parties = 6; //5个参与者
+        println(Thread.currentThread().getName() + "主线程");
         Runnable runnable = () -> {
             println(Thread.currentThread().getName() + "最后到达");
         };//最后一个参与者做的事
         CyclicBarrier cyclicBarrier = new CyclicBarrier(parties, runnable);
-        cyclicBarrier.reset();
         for (int i = 0; i < parties - 1; i++) {
             new TT(cyclicBarrier).start();
         }
@@ -99,7 +111,7 @@ public class TestConcurrentTools {
                 e.printStackTrace();
             }
         }).start();
-//        cyclicBarrier.reset();//重置
+        cyclicBarrier.reset();//重置
     }
 
     /**
@@ -143,7 +155,7 @@ public class TestConcurrentTools {
     }
 
     /**
-     * 用来测试ClickBarrier
+     * 用来测试CyclicBarrier
      */
     public static class TT extends Thread {
         public CyclicBarrier cyclicBarrier;

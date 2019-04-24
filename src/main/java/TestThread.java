@@ -276,7 +276,6 @@ public class TestThread {
 
         //线程跑完了，TERMINATED状态，interrupt没用
         println("after Thread run finished:" + t2.getState());
-
     }
 
 
@@ -292,7 +291,7 @@ public class TestThread {
 
         @Override
         public void run() {
-            //凡是wait，必须加锁，mmp不知为什么
+            //凡是wait，必须加锁
             try {
                 synchronized (this) {
                     println("WaitThread start...,state = " + getState());
