@@ -10,9 +10,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class TestConcurrentTools {
 
     public static void main(String[] args) {
-        testSemaphore();
+//        testSemaphore();
 //        testCountDownLatch();
-//        testCyclicBarrier();
+        testCyclicBarrier();
 //        testThreadLocal();
     }
 
@@ -83,6 +83,7 @@ public class TestConcurrentTools {
             println("倒计时 " + i + " 秒...");
             countDownLatch.countDown();
         }
+
     }
 
     /**

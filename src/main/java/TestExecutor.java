@@ -107,6 +107,10 @@ public class TestExecutor {
         println("----------------" + threadPoolExecutor.getActiveCount() + "-" + threadPoolExecutor.getMaximumPoolSize() + "-" + threadPoolExecutor.getLargestPoolSize() + "-" + threadPoolExecutor.getTaskCount());
     }
 
+
+    /**
+     * 类似于{@link java.util.TimerTask}一样的功能
+     */
     private static void testTimer() {
         //两种定时器的构造方式
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
