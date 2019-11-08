@@ -39,26 +39,45 @@ public class TestLock {
 
     /**
      * LockSupport:ReentrantLock就是基于这个实现的
+     * 类似与线程的挂起和中断
+     * park():尝试获取许可，如果许可可用，就立即返回，否则就挂起
+     * unpark():使得一个许可可用，许可只有一个，多次调用不会累加
      */
     public static void testLockSupport() {
 //        LockSupport.park(); //使得当前线程放弃cpu，进入WAITING状态，响应中断
-//        LockSupport.unpark(Thread.currentThread()); //使得当前线程从重新竞争cpu
+//        LockSupport.unpark(Thread.currentThread()); //使得当前线程重新竞争cpu
 
         Thread thread = new Thread(() -> {
+
             LockSupport.park(); //当前线程放弃cpu，进入WAITING
 //            LockSupport.parkNanos(1000000); // 当前线程最长等待1000000ns
 //            LockSupport.parkUntil(System.currentTimeMillis() + 3000);//等到当前线程+1000ms的时刻
-            println("after park: " + Thread.currentThread().getState());
+
+            while (true) {
+                long currentTime = System.currentTimeMillis();
+                if (currentTime % 50 == 0) {
+                    break;
+                } else {
+                    println("in park thread...");
+                }
+            }
         });
 
         thread.start();
+//        try {
+//            Thread.sleep(500);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        println("after park: " + thread.getState()); //WAITING，因为LockSupport.park()
+
+        LockSupport.unpark(thread); //使得thread可以被调度
         try {
-            Thread.sleep(500);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        println(thread.getState()); //WAITING，因为LockSupport.park()
-//        LockSupport.unpark(thread); //使得thread可以被调度
+        println("after unpark: " + thread.getState()); //等待unpark生效后打印线程状态
         thread.interrupt();
     }
 

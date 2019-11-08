@@ -2,10 +2,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 public class TestThread {
 
@@ -18,7 +15,20 @@ public class TestThread {
 
 //        testInterrupt();
 
-        testWaitNotifyDeeply();
+//        testWaitNotifyDeeply();
+
+        int processors = Runtime.getRuntime().availableProcessors();
+        println("current os cpu number is : " + processors);
+
+//        testJoin();
+
+
+        TraceThreadPoolExecutor executor = new TraceThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+//        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.allowCoreThreadTimeOut(true);
+        for (int i = 0; i < 5; i++) {
+            executor.execute(new TraceTask(i));
+        }
     }
 
 
@@ -278,6 +288,30 @@ public class TestThread {
         println("after Thread run finished:" + t2.getState());
     }
 
+    /**
+     * join
+     */
+    public static void testJoin() {
+        Thread t1 = new Thread(() -> {
+            try {
+                println("before t1 sleep...");
+                Thread.sleep(1000);
+                println("after t1 sleep...");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+
+        println("before t1 start");
+        try {
+            t1.start();
+            t1.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        println("after t1 start");
+    }
 
     private static void println(Object object) {
         System.out.println(object);
@@ -417,5 +451,93 @@ public class TestThread {
                 changeToNoA1();
             }
         }
+    }
+
+
+    /**
+     * 自定义的ThreadPoolExecutor打印异常堆栈
+     */
+    public static class TraceThreadPoolExecutor extends ThreadPoolExecutor {
+
+        public TraceThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
+            super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+        }
+
+        public TraceThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
+            super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
+        }
+
+        public TraceThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler) {
+            super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, handler);
+        }
+
+        public TraceThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler) {
+            super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
+        }
+
+        /**
+         * 可以重载其他方法，这里只选择一个实现
+         */
+        @Override
+        public void execute(Runnable command) {
+            super.execute(wrap(command, traceException(), Thread.currentThread().getName()));
+        }
+
+        private Exception traceException() {
+            return new Exception("trace Exception");
+        }
+
+        private Runnable wrap(Runnable task, Exception e, String name) {
+            return () -> {
+                try {
+                    task.run();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                    throw e1;
+                }
+            };
+        }
+    }
+
+    public static class TraceTask implements Runnable {
+
+        private int i = 0;
+
+        public TraceTask(int i) {
+            this.i = i;
+        }
+
+        @Override
+        public void run() {
+            println(100 / i);
+        }
+    }
+
+    private static void testForkJoin() {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                //写入本地
+                //上传server
+            }
+        });
+
+        ForkJoinPool pool = new ForkJoinPool();
+        pool.submit(new ForkJoinTask<String>() {
+            @Override
+            public String getRawResult() {
+                return null;
+            }
+
+            @Override
+            protected void setRawResult(String value) {
+
+            }
+
+            @Override
+            protected boolean exec() {
+                return false;
+            }
+        });
     }
 }

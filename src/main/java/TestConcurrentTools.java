@@ -31,24 +31,26 @@ public class TestConcurrentTools {
      */
     private static void testSemaphore() {
         try {
-            //给10个许可证
-            Semaphore semaphore = new Semaphore(0);
+            //构造传递许可证
+            //这里许可证每次release会+1，即使构造传的是0，也会加1
+            Semaphore semaphore = new Semaphore(1);
 
             //可以由另一个线程release
             new Thread(() -> {
                 try {
                     Thread.sleep(1000);
+                    semaphore.release();
+                    println("release semaphore..");
+
+                    semaphore.acquire(); //这里不release就走不进来，因为不是可重入的
+                    println("acquire2");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                semaphore.release();
             }).start();
 
             semaphore.acquire();
             println("acquire1");
-//
-//            semaphore.acquire(); //这里不release就走不进来，因为不是可重入的
-//            println("acquire2");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -89,37 +91,42 @@ public class TestConcurrentTools {
     /**
      * CyclicBarrier
      * 等待结束
+     * 设置一个关键点，所有线程到达此关键点后都需要等待其他线程，所有线程都到达后才会进行下一步
      */
     private static void testCyclicBarrier() {
-        int parties = 6; //5个参与者
+        int parties = 6; //参与者
         println(Thread.currentThread().getName() + "主线程");
         Runnable runnable = () -> {
             println(Thread.currentThread().getName() + "最后到达");
         };//最后一个参与者做的事
         CyclicBarrier cyclicBarrier = new CyclicBarrier(parties, runnable);
-        for (int i = 0; i < parties - 1; i++) {
+        for (int i = 0; i < parties; i++) {
             new TT(cyclicBarrier).start();
         }
 
         //这个例外的thread里面少了一个await，其他的所有thread都会一直等待他的await
-        new Thread(() -> {
-            try {
-                Thread.sleep(new Random().nextInt(1000) + 100);
-                //这个表示已经到达一个集合点A
-                println(Thread.currentThread().getName() + "到达C");
-                cyclicBarrier.await(); //通知自己已经到达
-            } catch (InterruptedException | BrokenBarrierException e) {
-                e.printStackTrace();
-            }
-        }).start();
+//        new Thread(() -> {
+//            try {
+//                Thread.sleep(new Random().nextInt(1000) + 100);
+//                //这个表示已经到达一个集合点A
+//                println(Thread.currentThread().getName() + "到达C");
+//                cyclicBarrier.await(); //通知自己已经到达
+//            } catch (InterruptedException | BrokenBarrierException e) {
+//                e.printStackTrace();
+//            }
+//        }).start();
         cyclicBarrier.reset();//重置
     }
 
     /**
      * ThreadLocal
+     * ThreadLocal是一个变量，如果在A线程中赋值为1，在B线程中再赋值为2，然后在A线程中去取，还是1，不受B线程影响
+     * <p>
+     * 原理:每次set/get的时候，都是通过Thread.currentThread()获取当前线程t，然后获取t的局部变量ThreadLocalMap，
+     * 然后对ThreadLocalMap进行set/get操作
      */
     public static void testThreadLocal() {
-        //线程独立的，每个线程只能获取到在自己本省中设置的值，不受其他线程影响
+        //线程独立的，每个线程只能获取到在自己本身中设置的值，不受其他线程影响
         ThreadLocal<Integer> threadLocal = ThreadLocal.withInitial(() -> {
             //用来赋初始值
             return 300;
@@ -148,8 +155,8 @@ public class TestConcurrentTools {
 
 
         //ThreadLocal随机数,减少资源冲突
-        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
-        threadLocalRandom.nextInt();
+//        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
+//        threadLocalRandom.nextInt();
 
         //CAS的底层就是根据这玩意实现的
 //        Unsafe unsafe = Unsafe.getUnsafe();
