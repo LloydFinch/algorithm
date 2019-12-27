@@ -1,7 +1,7 @@
 package reflection;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -32,7 +32,9 @@ public class TTT {
 
 //        ttt.recursion();
 
-        System.out.println(Loader.a);
+//        testHashMap();
+
+        testMethod();
     }
 
     volatile boolean can = false;
@@ -140,9 +142,13 @@ public class TTT {
      * 初始化: 将所有static代码块和赋值语句结合生成clinit()方法，并执行。上述的static int a = 10,这里是10了(c同理)
      */
     public static class Loader implements FF {
+
+        static {
+            System.out.println("Loader init");
+        }
+
         static {
             System.out.println("static init1, assign a to 20");
-            System.out.println("static init1,  b=" + b);
 
             /**
              * 这里来个死循环，会导致其他加载这个类的线程全部卡住
@@ -156,7 +162,7 @@ public class TTT {
             System.out.println("static init1 finish");
         }
 
-        public static final long a = System.currentTimeMillis();
+        public static long a = 10;
 
         static {
             System.out.println("static init2, a=" + a);
@@ -171,35 +177,161 @@ public class TTT {
         }
     }
 
-
     interface FF {
-        int b = 10;
+        long a = 10;
     }
 
-    public int recursionCount = 16386;
 
-    public void recursion() {
-        recursionCount--;
-        if (recursionCount > 0) {
-            recursion();
+    interface II {
+        long c = 10;
+    }
+
+
+    static class LL {
+        long c = 20;
+    }
+
+
+    public static class LoaderChild extends LL implements II {
+        static {
+            /**
+             * 这里因为歧义，所以要指定加载哪里的c
+             */
+            System.out.println(II.c);
+            System.out.println("LoaderChild init");
         }
 
+    }
 
-        /**
-         * 处理第一部分
-         */
-        {
-            long l = 1000L;
+    public static void testHashMap() {
+        HashMap<MapK, String> map = new HashMap<>();
 
+        MapK mapK = new MapK(100);
+        map.put(mapK, "hello");
+
+        MapK mapK1 = new MapK(100);
+        map.put(mapK1, "world");
+
+        System.out.println(map.size());
+
+    }
+
+    public static class MapK {
+        public int id;
+
+        public MapK(int id) {
+            this.id = id;
         }
 
-        /**
-         * 处理第二部分
-         */
+        @Override
+        public boolean equals(Object obj) {
+            MapK mapK = (MapK) obj;
+            return this.id == mapK.id;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(id);
+        }
+    }
+
+    //====================================================================================================================================
+
+    /**
+     * 方法的解析过程
+     */
+
+    public static abstract class Human {
+        public void sayHello() {
+            System.out.println("Human");
+        }
+    }
+
+    public static class Man extends Human {
+        @Override
+        public void sayHello() {
+            System.out.println("Man");
+        }
+    }
+
+    public static class Woman extends Human {
+        @Override
+        public void sayHello() {
+            System.out.println("Woman");
+        }
+    }
+
+    public void hello(Human human) {
+        System.out.println("Human");
+    }
+
+    public void hello(Man man) {
+        System.out.println("Man");
+    }
+
+    public void hello(Woman wuman) {
+        System.out.println("Woman");
+    }
+
+    public static void testMethod() {
+
+//        TTT ttt = new TTT();
+//
+//        Human man = new Man();
+//        ttt.hello(man);
+//        Human woman = new Man();
+//        ttt.hello(woman);
+
+        Human man = new Man();
+        man.sayHello();
+
+        Human woman = new Woman();
+        woman.sayHello();
+
+        man = new Woman();
+        man.sayHello();
+
+    }
+
+    //====================================================================================================================================
+
+    /**
+     * 证明静态变量和实例变量在声明前都只能赋值不能访问
+     */
+    public static class SA {
+
+        static {
+            /**
+             * 静态变量可以超前赋值但是不能超前访问
+             */
+            b = 40;
+//            System.out.println(b);
+        }
+
+        private static int b = 10;
+
+        static {
+            b = 20;
+        }
+
+        public SA() {
+            System.out.println("constructor ,b = " + b);
+        }
+    }
+
+    public static class CA extends SA {
         {
-            Object o = new Object();
+            /**
+             *实例变量可以超前赋值但不能超前访问
+             */
+            a = 40;
+//            System.out.println(a);
+        }
 
+        public int a = 10;
 
+        {
+            a = 20;
         }
     }
 }

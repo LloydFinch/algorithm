@@ -33,7 +33,6 @@ public class CompilerProcessor extends AbstractProcessor {
         mMessager.printMessage(Diagnostic.Kind.NOTE, "init......");
     }
 
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         mMessager.printMessage(Diagnostic.Kind.NOTE, "process......");
