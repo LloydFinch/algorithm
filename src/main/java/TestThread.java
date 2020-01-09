@@ -13,22 +13,23 @@ public class TestThread {
 //        testSyncCollections();
 //        testWaitNotify();
 
-//        testInterrupt();
+        testInterrupt();
 
 //        testWaitNotifyDeeply();
 
-        int processors = Runtime.getRuntime().availableProcessors();
-        println("current os cpu number is : " + processors);
+        //获取cpu核心数
+//        int processors = Runtime.getRuntime().availableProcessors();
+//        println("current os cpu number is : " + processors);
 
 //        testJoin();
 
 
-        TraceThreadPoolExecutor executor = new TraceThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
-//        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.allowCoreThreadTimeOut(true);
-        for (int i = 0; i < 5; i++) {
-            executor.execute(new TraceTask(i));
-        }
+//        TraceThreadPoolExecutor executor = new TraceThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+////        ExecutorService executor = Executors.newSingleThreadExecutor();
+//        executor.allowCoreThreadTimeOut(true);
+//        for (int i = 0; i < 5; i++) {
+//            executor.execute(new TraceTask(i));
+//        }
     }
 
 
@@ -221,19 +222,19 @@ public class TestThread {
      */
     public static void testInterrupt() {
 
-        //wait/timed_wait情况下中断测试
+        //wait/timed_wait情况下中断测试(sleep)
 //        Thread thread = new Thread() {
 //            @Override
 //            public void run() {
 //                try {
-//                    sleep(1000);
+//                    sleep(10000);
 //                } catch (InterruptedException e) {
 //                    //抛出中断异常，不是设置中断标志位，需要手动处理
 //                    //一般情况下，中断异常不应该捕获，应该交由上层处理
-//                    println(getState());
+//                    println(getState()); //因为interrupt所以取消sleep，还原到RUNNABLE
 //                    println("is interrupt:" + isInterrupted());//false
 //                    interrupt();//这里手动设置一下中断标记位
-//                    println("is interrupt:" + isInterrupted());//false
+//                    println("is interrupt:" + isInterrupted());//true
 //                }
 //            }
 //        };
@@ -244,48 +245,73 @@ public class TestThread {
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
-//        println(thread.getState());
+//        println(thread.getState()); //因为sleep所以TIMED_WAITING
 //        thread.interrupt();
 
 
         //=========block的情况下中断的测试
+//        Object lock = new Object();
+//        Thread t2 = new Thread() {
+//            @Override
+//            public void run() {
+////                synchronized (lock) {
+////                    while (!isInterrupted()) {
+////                        println("in while loop");
+////                    }
+////                }
+//                println("jump from while:" + getState());
+//            }
+//        };
+//
+//        //这里线程只是new出来，NEW状态，调用interrupt没用
+//        println("new Thread state:" + t2.getState());
+//        synchronized (lock) {
+//            try {
+//                t2.start();
+////                Thread.sleep(16);
+////                t2.interrupt();
+////                t2.join();//死循环了，当前线程等t2，t2又等待当前线程的锁，慢慢等吧
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        //线程跑完了，TERMINATED状态，interrupt没用
+//        println("after Thread run finished:" + t2.getState());
 
 
-        Object lock = new Object();
-        Thread t2 = new Thread() {
+        //wait情况下的中断(wait)
+        Thread thread = new Thread() {
             @Override
             public void run() {
-//                synchronized (lock) {
-//                    while (!isInterrupted()) {
-//                        println("in while loop");
-//                    }
-//                }
-                println("jump from while:" + getState());
+                synchronized (this) {
+                    try {
+                        System.out.println("start wait");
+                        wait();
+                    } catch (InterruptedException e) {
+                        System.out.println(getState());
+                        System.out.println("is interrupt:" + isInterrupted());
+                        interrupt();
+                        System.out.println("is interrupt:" + isInterrupted());
+                        System.out.println(getState());
+                    }
+                }
             }
         };
 
-        //这里线程只是new出来，NEW状态，调用interrupt没用
-        println("new Thread state:" + t2.getState());
-
-        synchronized (lock) {
-            try {
-                t2.start();
-//                Thread.sleep(16);
-//                t2.interrupt();
-//                t2.join();//死循环了，当前线程等t2，t2又等待当前线程的锁，慢慢等吧
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
+        thread.start();
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        //线程跑完了，TERMINATED状态，interrupt没用
-        println("after Thread run finished:" + t2.getState());
+        thread.interrupt();
     }
 
     /**

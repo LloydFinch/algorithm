@@ -167,7 +167,7 @@ public class Test {
          * ThreadLocal
          */
 
-        //读写锁:持有两个锁，可以分别对读/写进行控制
+        //读写锁:持有两个锁，可以分别对读/写进行控制，可重入
         ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
         ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
@@ -179,7 +179,7 @@ public class Test {
         writeLock.unlock();
 
 
-        //信号量:持有n个凭证，每次进行一些操作都需要消耗凭证
+        //信号量:持有n个凭证，每次进行一些操作都需要消耗凭证(不可重入)，可以A线程acquire，B线程release
         int permits = 8;
         Semaphore semaphore = new Semaphore(permits);
         semaphore.acquire(1);//请求获取n个凭证，如果获取到就继续向下跑，否则会让当前线程wait在这里
@@ -203,7 +203,7 @@ public class Test {
         };
         CyclicBarrier cyclicBarrier = new CyclicBarrier(parties, barrierAction);
         //通知自己已经到达，8个参与者，必须有8个await()，否则会一直等待下去，直到等齐8个await()才会继续向下跑
-        cyclicBarrier.await();
+        cyclicBarrier.await(); //这个调用次数达到parties后，就会触发barrierAction
         cyclicBarrier.reset(); //重置
 
         //线程本地变量:线程独立的，在一个线程中的修改，另一个线程看不到
