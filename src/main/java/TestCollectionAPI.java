@@ -1,16 +1,19 @@
 import structure.LruCache;
 
 import java.util.*;
+import java.util.function.Consumer;
 
-public class Test {
+public class TestCollectionAPI {
 
     public static void main(String args[]) {
 
         //testMap();
 
-        //testSet();
+//        testSet();
 
-        //testTreeMap();
+//        testTreeMap();
+
+        testTreeSet();
 
         //testLinkedHashMap();
 
@@ -18,44 +21,10 @@ public class Test {
 //        System.out.println(getCommonPre(new String[]{"flower", "flow", "fill", "fillow"}));
 //        System.out.println((System.currentTimeMillis() - time1));
 
+//    test2();
+//        test();
 
-        String condition = new String("hello");
-        System.out.println(condition == "hello");
-        switch (condition) {
-            case "hello":
-                System.out.println(condition);
-                break;
-            default:
-                break;
-        }
-
-        Integer integer = new Integer(10000000);
-        System.out.println(integer.equals(10000000));
-        switch (integer) {
-            case 10000000:
-                System.out.println(integer);
-                break;
-            default:
-                break;
-        }
-        System.out.println(1.00d == 1.0f);
-
-        System.out.println(0.1 + 0.2);
-        boolean a = (0.3 - 0.2) == (0.2 - 0.1);
-        System.out.println(a);
-
-        System.out.println("\251");
-
-        TreeNode treeNode = new TreeNode();
-        treeNode.value = "10";
-        add(treeNode);
-        System.out.println(treeNode.value);
-
-        System.out.println("-----------------------------------");
-        testEnumSet();
-
-        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
-        test();
+//        testHashMapTable();
     }
 
     private static void add(TreeNode treeNode) {
@@ -111,9 +80,22 @@ public class Test {
     }
 
     private static void testTreeSet() {
-        //排重和有序
-        //按健有序
+        //排重&有序
+        //按照key有序
         TreeSet<String> treeSet = new TreeSet<>();
+        treeSet.add("d");
+        treeSet.add("a");
+        treeSet.add("g");
+        treeSet.add("f");
+        treeSet.add("e");
+        treeSet.add("ge");
+        treeSet.add("ae");
+        treeSet.add("ef");
+        treeSet.add("fe");
+        treeSet.forEach(System.out::println);
+
+        TreeSet<Object> treeSet1 = new TreeSet<>();
+        treeSet1.add(new Object());
 
     }
 
@@ -209,6 +191,45 @@ public class Test {
 
     }
 
+    public static void test2() {
+        String condition = new String("hello");
+        System.out.println(condition == "hello");
+        switch (condition) {
+            case "hello":
+                System.out.println(condition);
+                break;
+            default:
+                break;
+        }
+
+        Integer integer = new Integer(10000000);
+        System.out.println(integer.equals(10000000));
+        switch (integer) {
+            case 10000000:
+                System.out.println(integer);
+                break;
+            default:
+                break;
+        }
+        System.out.println(1.00d == 1.0f);
+
+        System.out.println(0.1 + 0.2);
+        boolean a = (0.3 - 0.2) == (0.2 - 0.1);
+        System.out.println(a);
+
+        System.out.println("\251");
+
+        TreeNode treeNode = new TreeNode();
+        treeNode.value = "10";
+        add(treeNode);
+        System.out.println(treeNode.value);
+
+        System.out.println("-----------------------------------");
+        testEnumSet();
+
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+    }
+
     private static void test() {
         String hello = "#123456###7855555#";
         String hello2 = "#123456#77777#666#";
@@ -220,6 +241,25 @@ public class Test {
         System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
 
         System.out.println(setTextColorByFlag(hello, "#").toString());
+    }
+
+    /**
+     * 测试HashMap和HashTable对null的支持
+     */
+    public static void testHashMapTable() {
+        /**
+         * key和value都可以为null
+         */
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put(null, null);
+        hashMap.put(null, null);
+
+        /**
+         * key和value都不能为null
+         */
+        Hashtable<String, String> hashtable = new Hashtable<>();
+        hashtable.put("hello", "world");
+
     }
 
     /**

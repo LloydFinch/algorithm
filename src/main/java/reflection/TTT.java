@@ -32,9 +32,9 @@ public class TTT {
 
 //        ttt.recursion();
 
-//        testHashMap();
+        testHashMap();
 
-        testMethod();
+//        testMethod();
     }
 
     volatile boolean can = false;
@@ -229,6 +229,13 @@ public class TTT {
             return this.id == mapK.id;
         }
 
+        /**
+         * 重写equals需要重写hashCode()方法
+         * 因为JVM先判断hashCode是否相同，相同才比较equals，
+         * 否则直接认为不同
+         *
+         * @return
+         */
         @Override
         public int hashCode() {
             return Objects.hashCode(id);

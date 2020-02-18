@@ -41,7 +41,6 @@ public class TestThread {
      */
     private static void testWaitNotifyDeeply() {
         Object lock = new Object();
-        Object test = new Object();
         Thread thread = new Thread(() -> {
             synchronized (lock) {
                 try {

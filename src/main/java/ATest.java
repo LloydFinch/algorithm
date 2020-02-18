@@ -1,5 +1,7 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicStampedReference;
@@ -125,6 +127,18 @@ public class ATest {
         public int compareTo(@NotNull TP o) {
             return priority - o.priority;
         }
+    }
+
+
+    /**
+     * 同步容器
+     */
+    public void testSynchronizedCollections() {
+        Collections.synchronizedMap(new HashMap<>());
+    }
+
+    public void test222() {
+        TestClass.ChildStatic childStatic = new TestClass.ChildStatic();
     }
 }
 

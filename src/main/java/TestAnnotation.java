@@ -21,7 +21,6 @@ public class TestAnnotation {
 
     @Test
     static class Parent {
-
     }
 
     static class Child extends Parent {
@@ -40,7 +39,7 @@ public class TestAnnotation {
 
 
     public static void main(String[] args) {
-        //Child继承了Parent，Parent实现了注解@Test，而Test注解被@Inherited修饰，所以可以被继承，Child就有了这个注解
+        //Child继承了Parent，Parent实现了注解@TestCollectionAPI，而Test注解被@Inherited修饰，所以可以被继承，Child就有了这个注解
         System.out.println(Child.class.isAnnotationPresent(Test.class));
         Annotation[] annotations = Child.class.getAnnotations();
         for (Annotation annotation : annotations) {
