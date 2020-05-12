@@ -1,4 +1,3 @@
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -37,7 +36,7 @@ public class TestCondition {
         private Lock mLock;
         private Condition condition;
 
-        WaitThread(@NotNull String name, Object lock) {
+        WaitThread(String name, Object lock) {
             super(name);
             this.lock = lock;
         }

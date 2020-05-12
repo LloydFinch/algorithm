@@ -3,6 +3,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Future/FutureTask测试
+ */
 public class TestCompletableFuture {
 
     public static void main(String[] args) {

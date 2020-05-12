@@ -96,7 +96,6 @@ public class TestAnnotation {
     public class TTAnotation {
         //这个方法用注解修饰的风骚一点
         public void hello(@QueryParam(name = "java") String name, @QueryParam(name = "android") @DefaultValue(value = "kotlin") String world) {
-
         }
     }
 }

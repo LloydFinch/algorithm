@@ -1,4 +1,3 @@
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -124,7 +123,7 @@ public class ATest {
         }
 
         @Override
-        public int compareTo(@NotNull TP o) {
+        public int compareTo( TP o) {
             return priority - o.priority;
         }
     }

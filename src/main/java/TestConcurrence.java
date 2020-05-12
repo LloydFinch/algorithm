@@ -1,4 +1,3 @@
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,7 +38,7 @@ public class TestConcurrence {
         //使用原子变量，不需要加锁
         public static AtomicInteger atomicInteger = new AtomicInteger(0);
 
-        public Visit(@NotNull String name) {
+        public Visit(String name) {
             super(name);
         }
 
