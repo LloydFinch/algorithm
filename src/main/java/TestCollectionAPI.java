@@ -1,19 +1,21 @@
 import structure.LruCache;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Consumer;
 
 public class TestCollectionAPI {
 
     public static void main(String args[]) {
 
-        //testMap();
+        testMap();
 
 //        testSet();
 
 //        testTreeMap();
 
-        testTreeSet();
+//        testTreeSet();
 
         //testLinkedHashMap();
 
@@ -48,6 +50,10 @@ public class TestCollectionAPI {
         for (String key : hashMap.keySet()) {
             System.out.println(key + ":" + hashMap.get(key));
         }
+
+        ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<>();
+
+
     }
 
     private static void testSet() {
@@ -77,6 +83,13 @@ public class TestCollectionAPI {
         for (Map.Entry<String, String> kv : treeMap.entrySet()) {
             System.out.println(kv.getKey() + ":" + kv.getValue());
         }
+
+        ConcurrentSkipListMap<String, String> concurrentSkipListMap = new ConcurrentSkipListMap<>();
+        String key = "key";
+        String value = "value";
+        concurrentSkipListMap.put(key, value);
+        concurrentSkipListMap.get(key);
+        concurrentSkipListMap.remove(key);
     }
 
     private static void testTreeSet() {
